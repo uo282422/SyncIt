@@ -1,24 +1,20 @@
-# Compiled class file
-*.class
+# Dependencias instaladas
+/node_modules
 
-# Log file
-*.log
+# Archivos y carpetas generadas en el proceso de desarrollo
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+/.pnp
+.pnp.js
 
-# BlueJ files
-*.ctxt
+# Archivos de configuración locales
+.env
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Archivos generados durante la construcción
+/build
+/dist
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Dependiendo del entorno de desarrollo, puedes querer ignorar también
+# archivos de configuración de editor específicos, como estos para Visual Studio Code:
+.vscode
