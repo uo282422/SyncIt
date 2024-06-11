@@ -1,0 +1,117 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5em;
+    margin-right: 5em;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+}
+
+.legend-container {
+    margin-bottom: 1em;
+}
+
+.legend-title {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos */
+    margin-bottom: 0.5em;
+}
+
+.legend-text {
+    margin-right: 2.5em; /* Añade espacio entre el texto y el cuadrado de color */
+}
+
+.color-picker-container {
+    display: flex; /* Coloca los elementos en línea */
+    align-items: center; /* Alinea verticalmente los elementos */
+}
+
+/* Estilos para el formulario y el calendario */
+.calendar {
+    width: 100%;
+    max-width: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+    text-align: center;
+    padding: 20px;
+    background-color: #007bff;
+    color: white;
+    grid-column: span 7;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.day-name, .empty, .day-cell {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.day-cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 60px;
+}
+
+.day-number {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+}
+
+.color-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 10%;
+}
+
+.color-square {
+    width: 2em;
+    height: 2em;
+    display: inline-block;
+    margin: 0.5px;
+}
+
+.calendar-grid div {
+    background-color: white;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.calendar-grid .day-name {
+    background-color: #f7f7f7;
+    font-weight: bold;
+}
+
+.calendar-grid .empty {
+    background-color: #f0f0f0;
+}

@@ -1,40 +1,152 @@
 doctype html
-html(lang="en")
-    head
-        meta(charset="UTF-8")
-        meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title Document
-    body 
-        h1 Index
-        
-        form(action="/sendDate", method="POST",id="myForm")
-            input(type="hidden", id="idx", name="idx")
-            input(type="text", id="texto", name="texto")
-            table
-                thead
-                    tr
-                    th Día
-                    th Botón
-                    th Asignados
-                tbody
-                    - let a=""
-                    - for (let i = 1; i <= 31; i++)
-                        tr
-                            td= i
-                            td  
-                                button(type="button", onclick=`setIdx(${i})`) Enviar
-                            td(id="F"+i)=a
-                            
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet", href="css/stylesCalendario.css")
+    title Calendario Dinámico
 
-
+  body
+    input(type="hidden" id="idx" name="idx")
+    .container
+    .color-picker-container
+        input(type="text", id="texto", name="texto")
+        input(type="color", id="colorPicker", name="colorPicker", value="#ff0000")
+        button(type="button", onclick="save()") Guardar
+    .legend-container
+      .legend-title Leyenda
+      .legend-item Persona1:
+    .form-container
+      form#myForm(action="/sendDate", method="POST", class="calendar")
+        #calendar-header.calendar-header
+        #calendar-grid.calendar-grid
+          .day-name Lunes
+          .day-name Martes
+          .day-name Miércoles
+          .day-name Jueves
+          .day-name Viernes
+          .day-name Sábado
+          .day-name Domingo
+    
+    
+    
     script.
-      function setIdx(idx) {
-            document.getElementById('idx').value = idx; 
-            
-            const index = idx;
-            const columna = document.getElementById('F'+idx)
-            
-            columna.innerHTML =  document.getElementById('texto').value
-            
-            document.getElementById('myForm').submit();  
+        function generateCalendar(month, year) { 
+            const calendarHeader = document.getElementById('calendar-header');
+            const calendarGrid = document.getElementById('calendar-grid');
+
+            // Elimina los días previos (debe eliminar todo excepto los nombres de los días)
+            while (calendarGrid.children.length > 7) {
+                calendarGrid.removeChild(calendarGrid.lastChild);
+            }
+
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            calendarHeader.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const startingDay = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Añade espacios vacíos para los días previos al primer día del mes
+            for (let i = 0; i < startingDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('empty');
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Añade los días del mes
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell');
+                dayCell.setAttribute('data-day', day); // Añade un atributo de datos para identificar la casilla
+                dayCell.addEventListener('click', () => setIdx(day));
+
+                const dayNumber = document.createElement('div');
+                dayNumber.classList.add('day-number');
+                dayNumber.textContent = day;
+
+                const colorContainer = document.createElement('div');
+                colorContainer.classList.add('color-container');
+
+                dayCell.appendChild(dayNumber);
+                dayCell.appendChild(colorContainer);
+                calendarGrid.appendChild(dayCell);
+            }
+
+            // Añade espacios vacíos para completar la última fila del calendario
+            const totalCells = startingDay + daysInMonth;
+            const emptyCellsAtEnd = (7 - (totalCells % 7)) % 7;
+            for (let i = 0; i < emptyCellsAtEnd; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('empty');
+                calendarGrid.appendChild(emptyCell);
+            }
         }
+        unction setIdx(day) {
+            console.log("El día seleccionado es:", day);
+            document.getElementById('idx').value = day;
+            console.log("El día seleccionado es:" + day + " con texto " + document.getElementById('texto').value);
+            addColorSquare(day); // Añade un cuadrado de color en la casilla correspondiente
+            document.getElementById('myForm').submit();
+        }
+
+        function addColorSquare(day) {
+            const dayCell = document.querySelector(`.day-cell[data-day='${day}']`);
+            if (dayCell) {
+                const colorContainer = dayCell.querySelector('.color-container');
+                const colorSquare = document.createElement('div');
+                colorSquare.classList.add('color-square');
+                colorSquare.style.backgroundColor = document.getElementById('colorPicker').value;
+                colorContainer.appendChild(colorSquare);
+            }
+        }
+
+        function getRandomColor() {
+            // Genera un color hexadecimal aleatorio
+            return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        }
+
+        document.getElementById("colorPicker").addEventListener("change", function() {
+            
+            changeColor();
+        });
+
+        function changeColor() {
+            console.log("Color cambiado")
+        }
+        function save() {
+            var color= document.getElementById('colorPicker').value;
+            var textoValue = document.getElementById('texto').value;
+
+            // Crear el elemento de leyenda
+            var newLegendItem = document.createElement('div');
+            newLegendItem.classList.add('legend-item');
+
+            // Crear el elemento de cuadrado de color
+            var colorSquare = document.createElement('span');
+            colorSquare.classList.add('color-square');
+            colorSquare.style.backgroundColor = color; // Establecer el color del cuadrado de color
+
+            // Crear el elemento de texto
+            var legendText = document.createElement('span');
+            legendText.textContent = textoValue;
+            
+
+            // Añadir el cuadrado de color y el texto al elemento de leyenda
+            newLegendItem.appendChild(legendText);
+            newLegendItem.appendChild(colorSquare);
+            
+
+            // Añadir el elemento de leyenda al contenedor de leyenda
+            document.querySelector('.legend-container').appendChild(newLegendItem);
+        }
+
+        // Obtiene la fecha actual y genera el calendario
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        generateCalendar(currentMonth, currentYear);
+        
+
+
+        f
