@@ -7,17 +7,18 @@ html(lang="es")
     title Calendario Dinámico
 
   body
-    input(type="hidden" id="idx" name="idx")
+    
     .container
     .color-picker-container
         input(type="text", id="texto", name="texto")
-        input(type="color", id="colorPicker", name="colorPicker", value="#ff0000")
+        input(type="color", id="colorPicker", name="colorPicker", value="#FFFFFF")
         button(type="button", onclick="save()") Guardar
     .legend-container
       .legend-title Leyenda
-      .legend-item Persona1:
     .form-container
       form#myForm(action="/sendDate", method="POST", class="calendar")
+        input(type="hidden" id="idx" name="idx")
+        input(type="hidden" id="uList" name="uList")
         #calendar-header.calendar-header
         #calendar-grid.calendar-grid
           .day-name Lunes
@@ -82,13 +83,41 @@ html(lang="es")
                 calendarGrid.appendChild(emptyCell);
             }
         }
-        unction setIdx(day) {
+
+        // Obtiene la fecha actual y genera el calendario
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        generateCalendar(currentMonth, currentYear);
+        
+        
+        
+
+
+        
+        function setIdx(day) {
             console.log("El día seleccionado es:", day);
-            document.getElementById('idx').value = day;
-            console.log("El día seleccionado es:" + day + " con texto " + document.getElementById('texto').value);
+                    
             addColorSquare(day); // Añade un cuadrado de color en la casilla correspondiente
-            document.getElementById('myForm').submit();
+            //document.getElementById('idx').value = day;
+            /**
+            // Configurar los datos a enviar en el cuerpo de la solicitud POST
+            var postData = {
+                idx: day,
+                userList: userList
+            };
+            
+            // Realizar la solicitud POST
+            fetch('/sendDate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            })**/
+            
         }
+
 
         function addColorSquare(day) {
             const dayCell = document.querySelector(`.day-cell[data-day='${day}']`);
@@ -96,7 +125,7 @@ html(lang="es")
                 const colorContainer = dayCell.querySelector('.color-container');
                 const colorSquare = document.createElement('div');
                 colorSquare.classList.add('color-square');
-                colorSquare.style.backgroundColor = document.getElementById('colorPicker').value;
+                colorSquare.style.backgroundColor = userDict[idControl].userColor;
                 colorContainer.appendChild(colorSquare);
             }
         }
@@ -106,47 +135,104 @@ html(lang="es")
             return '#' + Math.floor(Math.random() * 16777215).toString(16);
         }
 
-        document.getElementById("colorPicker").addEventListener("change", function() {
-            
-            changeColor();
-        });
-
-        function changeColor() {
-            console.log("Color cambiado")
-        }
-        function save() {
-            var color= document.getElementById('colorPicker').value;
-            var textoValue = document.getElementById('texto').value;
-
-            // Crear el elemento de leyenda
-            var newLegendItem = document.createElement('div');
-            newLegendItem.classList.add('legend-item');
-
-            // Crear el elemento de cuadrado de color
-            var colorSquare = document.createElement('span');
-            colorSquare.classList.add('color-square');
-            colorSquare.style.backgroundColor = color; // Establecer el color del cuadrado de color
-
-            // Crear el elemento de texto
-            var legendText = document.createElement('span');
-            legendText.textContent = textoValue;
-            
-
-            // Añadir el cuadrado de color y el texto al elemento de leyenda
-            newLegendItem.appendChild(legendText);
-            newLegendItem.appendChild(colorSquare);
-            
-
-            // Añadir el elemento de leyenda al contenedor de leyenda
-            document.querySelector('.legend-container').appendChild(newLegendItem);
-        }
-
-        // Obtiene la fecha actual y genera el calendario
-        const today = new Date();
-        const currentMonth = today.getMonth();
-        const currentYear = today.getFullYear();
-        generateCalendar(currentMonth, currentYear);
         
+        var userDict={};
+        var idControl="";
+        function save() {
+            actualUser = document.getElementById('texto').value;
+            actualColor = document.getElementById('colorPicker').value;
+
+            var postData = {
+                candName: actualUser,
+                candColor: actualColor,
+            };
 
 
-        f
+            fetch('/getUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta' + response.statusText);
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                console.log("Data es ", data)
+                if (data.docId == null) {
+                    console.log("No debería entrar, el usuario siempre debería estar creado")
+                } else {
+                    const userReturned= data.docId
+                    console.log('User exists with ID:', userReturned);
+                    userDict[userReturned.id] = { userName: userReturned.userName, userColor: userReturned.userColor };
+                    
+                    console.log(userDict);
+                    actualizarLeyenda();
+                    idControl=userReturned.id
+                    
+                }
+            })
+            .catch(error => console.error('Error fetching user:', error));
+
+        }
+        function actualizarLeyenda() {
+            // Obtener la referencia al contenedor de la leyenda
+            var legendContainer = document.querySelector('.legend-container');
+
+            // Limpiar la leyenda existente antes de actualizarla
+            legendContainer.innerHTML = '';
+            // Crear el elemento de título de leyenda
+            var legendTitle = document.createElement('div');
+            legendTitle.classList.add('legend-title');
+            legendTitle.textContent = 'Leyenda';
+            legendContainer.appendChild(legendTitle);
+            // Iterar sobre userDict y crear un LegendItem por cada usuario
+            Object.keys(userDict).forEach(function(userId) {
+                var user = userDict[userId];
+                var uName = user.userName;
+                var uColor = user.userColor;
+                var uId = userId;
+                
+                // Crear el elemento de leyenda
+                var newLegendItem = document.createElement('div');
+                newLegendItem.classList.add('legend-item');
+
+                // Crear el elemento de cuadrado de color
+                var colorSquare = document.createElement('span');
+                colorSquare.classList.add('color-square');
+                colorSquare.style.backgroundColor = uColor;
+                colorSquare.setAttribute('data-user', uId); 
+
+                // Agregar el event listener al color square
+                colorSquare.addEventListener('click', function() {
+                    var userId = this.getAttribute('data-user');
+                    changeUser(userId);
+                });
+
+                // Crear el elemento de texto
+                var legendText = document.createElement('span');
+                legendText.textContent = uName;
+
+                // Añadir el cuadrado de color y el texto al elemento de leyenda
+                newLegendItem.appendChild(legendText);
+                newLegendItem.appendChild(colorSquare);
+                newLegendItem.setAttribute('data-user', uName);
+
+                // Agregar el LegendItem al contenedor de la leyenda
+                legendContainer.appendChild(newLegendItem);
+            });
+
+            console.log("Leyenda actualizada");
+            document.getElementById('texto').value= ""
+            document.getElementById('colorPicker').value="#ffffff"
+        }
+
+        function changeUser(userId) {
+            idControl=userId
+
+            console.log("User cambiado a " + userDict[userId].userName, "con color "+userDict[userId].userColor);
+            
+        }
