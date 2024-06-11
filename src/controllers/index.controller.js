@@ -2,21 +2,26 @@ const controller = {}
 const DateRepository = require('../repositories/dateRepository')
 
 controller.index = async (req,res)=>{
+    
+    res.render('index')
 
+}
+
+controller.addDate = async (req,res)=>{
 
     try{
+        const userName=req.body.texto
+        console.log("Llamada al post, texto: "+userName)
+        const dateData = {};
+        console.log("Index: "+req.body.idx)
 
-        const title = 'INDEX DESDE EL SERVIDOR CON PUG y desde una variable'
-        
-        const dateData = {
+        /* DateRepository.addDate(userName, dateData)
+        .then(docId => {
             
-          };
-          
-          DateRepository.addDate('John Doe2', dateData)
-            .then(docId => console.log('Date added with ID:', docId))
-            .catch(error => console.error('Error:', error));
-
-        res.render('index', {title:title})
+            console.log("Index: ")
+            
+        })
+        .catch(error => console.error('Error:', error));  */
 
     }catch(err){
         console.log(err)
@@ -24,3 +29,5 @@ controller.index = async (req,res)=>{
 }
 
 module.exports = controller
+
+

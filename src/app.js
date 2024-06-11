@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser');
 const path=(require('path'))
 const port = 3000;
 
@@ -7,6 +8,11 @@ const port = 3000;
 
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, 'views'))
+
+//Middleware 
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 //Routes
 app.use(require('./routes/index.routes'))
 
