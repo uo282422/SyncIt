@@ -50,6 +50,29 @@ class UserRepository {
         throw error;
       }
     }
+  
+    async getAllUsers() {
+      try {
+        const snapshot = await db.get();
+        
+        
+        
+         let usersData = [];
+        
+        
+        snapshot.forEach(doc => {
+          console.log(doc.id, '=>', doc.data());
+          usersData.push({ id: doc.id, ...doc.data() });
+        });
+        
+        
+        return usersData;
+        
+      } catch (error) {
+        console.error('Error getting users: ', error);
+        throw error;
+      }
+    }
       
       
 };

@@ -13,6 +13,7 @@ html(lang="es")
         input(type="text", id="texto", name="texto")
         input(type="color", id="colorPicker", name="colorPicker", value="#FFFFFF")
         button(type="button", onclick="save()") Guardar
+        button(type="button", onclick="load()") Recuperar
     .legend-container
       .legend-title Leyenda
     .form-container
@@ -133,7 +134,39 @@ html(lang="es")
                
         var userDict={};
         var idControl="";
+
+        function load(){
+            console.log("Llamada a Load")
+            var postData = {
+                
+            };
+            fetch('/getAllUsers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta' + response.statusText);
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                
+                const usersReturned=data.docId
+                console.log(`Diccionario de usuarios->${Object.keys(userDict).length}`)
+                usersReturned.forEach(u => {
+                    userDict[u.id] = { userName: u.userName, userColor: u.userColor };
+                })
+                console.log(`Diccionario de usuarios->${Object.keys(userDict).length}`)
+                actualizarLeyenda()
+            })
+            .catch(error => console.error('Error fetching user:', error));
+        }
+
         function save() {
+            console.log("Llamada a Save")
             actualUser = document.getElementById('texto').value;
             actualColor = document.getElementById('colorPicker').value;
 

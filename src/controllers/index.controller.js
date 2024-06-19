@@ -61,6 +61,23 @@ controller.getUser = async (req,res)=>{
         console.log(err)
     }
 }
+controller.getAllUsers = async (req,res)=>{
+
+    try{
+       
+        const docId = await UsersRepository.getAllUsers();
+
+        if(docId == null){
+            
+           //No hay usuarios en la base de datos
+        }
+        return res.status(200).json({ docId });
+
+
+    }catch(err){
+        console.log(err)
+    }
+}
 
 
 
