@@ -61,7 +61,7 @@ html(lang="es")
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day-cell');
                 dayCell.setAttribute('data-day', day); // Añade un atributo de datos para identificar la casilla
-                dayCell.addEventListener('click', () => setIdx(day));
+                dayCell.addEventListener('click', () => addSquare(day));
 
                 const dayNumber = document.createElement('div');
                 dayNumber.classList.add('day-number');
@@ -96,16 +96,16 @@ html(lang="es")
 
 
         
-        function setIdx(day) {
+        function addSquare(day) {
             console.log("El día seleccionado es:", day);
                     
             addColorSquare(day); // Añade un cuadrado de color en la casilla correspondiente
             //document.getElementById('idx').value = day;
-            /**
+            
             // Configurar los datos a enviar en el cuerpo de la solicitud POST
             var postData = {
-                idx: day,
-                userList: userList
+                day: day,
+                userId: idControl
             };
             
             // Realizar la solicitud POST
@@ -115,7 +115,7 @@ html(lang="es")
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(postData)
-            })**/
+            })
             
         }
 
