@@ -13,10 +13,10 @@ controller.addDate = async (req,res)=>{
     try{
         
     //    TODO:: CHECKEAR PORQUE HAN CAMBIADO LOS PARAMETROS DEL BODY
-        console.log("Post con day: "+req.body.day)
-        console.log("Post con userId: ", req.body.userId);
+        //console.log("Post con day: "+req.body.day)
+        //console.log("Post con userId: ", req.body.userId);
        
-        console.log(`User: ${req.body.userId}, Day: ${req.body.day}`)
+        //console.log(`User: ${req.body.userId}, Day: ${req.body.day}`)
            
         
         //Consultar BD, si existe la date con fecha -> ver su lista de users
@@ -25,13 +25,33 @@ controller.addDate = async (req,res)=>{
         //si no
         //  no hacer nada
 
-         DateRepository.addDate(req.body.day, req.body.userId)
+         DateRepository.addDate(req.body.day, req.body.userId, req.body.userCol)
         .then(docId => {
             
-            console.log("Dia añadido a BD")
+            console.log("Dia añadido a BD con dia "+req.body.day+" y color "+req.body.userCol)
             
         })
         .catch(error => console.error('Error:', error));  
+
+    }catch(err){
+        console.log(err)
+    }
+}
+controller.getDatesByUser = async (req,res)=>{
+
+    try{
+        var uId = req.body.userId;
+        
+    
+        const docId = await DateRepository.getDatesByUser(uId);
+
+        if(docId == null){
+            
+            
+            return null;
+        }
+        return res.status(200).json({ docId });
+
 
     }catch(err){
         console.log(err)
