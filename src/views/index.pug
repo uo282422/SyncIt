@@ -10,11 +10,16 @@ html(lang="es")
     
     .container
     .color-picker-container
-        input(type="text", id="texto", name="texto")
+        input(type="text" id="texto" name="texto" required)
+      
         input(type="color", id="colorPicker", name="colorPicker", value="#FFFFFF")
+        
         button(type="button", onclick="save()") Guardar
         button(type="button", onclick="load()") Recuperar
         button(type="button", onclick="loadDates()") RecFechas
+        
+    span.error#error-texto ERROR! El nombre del usuario solo debe contener letras y números, sin espacios ni otros caracteres.
+        
     .legend-container
       .legend-title Leyenda
     .form-container
@@ -34,6 +39,22 @@ html(lang="es")
     
     
     script.
+        function validarUsuario() {
+                const input = document.getElementById('texto');
+                const errorText = document.getElementById('error-texto');
+                const regex = /^[a-zA-Z0-9]+$/;
+
+                if (input.value === '' || !regex.test(input.value)) {
+                errorText.style.display = 'inline';
+                return false;
+                } else {
+                errorText.style.display = 'none';
+                return true;
+                }
+        }
+        document.getElementById('texto').addEventListener('input', function () {
+            validarUsuario();
+        });
         function generateCalendar(month, year) { 
             const calendarHeader = document.getElementById('calendar-header');
             const calendarGrid = document.getElementById('calendar-grid');
@@ -211,45 +232,50 @@ html(lang="es")
         }
 
         function save() {
-            //console.log("Llamada a Save")
-            actualUser = document.getElementById('texto').value;
-            actualColor = document.getElementById('colorPicker').value;
+            if (!validarUsuario()) {
+                event.preventDefault();
+                const input = document.getElementById('texto');
+                input.value = '';
+            }else{
+                //console.log("Llamada a Save")
+                actualUser = document.getElementById('texto').value;
+                actualColor = document.getElementById('colorPicker').value;
 
-            var postData = {
-                candName: actualUser,
-                candColor: actualColor,
-            };
+                var postData = {
+                    candName: actualUser,
+                    candColor: actualColor,
+                };
 
 
-            fetch('/getUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(postData)
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta' + response.statusText);
-                }
-                return response.json(); 
-            })
-            .then(data => {
-                //console.log("Data es ", data)
-                if (data.docId == null) {
-                   // console.log("No debería entrar, el usuario siempre debería estar creado")
-                } else {
-                    const userReturned= data.docId
-                    //console.log('User exists with ID:', userReturned);
-                    userDict[userReturned.id] = { userName: userReturned.userName, userColor: userReturned.userColor };
-                    
-                    //console.log(userDict);
-                    actualizarLeyenda();
-                    idControl=userReturned.id
-                    
-                }
-            })
-            .catch(error => console.error('Error fetching user:', error));
-
+                fetch('/getUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta' + response.statusText);
+                    }
+                    return response.json(); 
+                })
+                .then(data => {
+                    //console.log("Data es ", data)
+                    if (data.docId == null) {
+                    // console.log("No debería entrar, el usuario siempre debería estar creado")
+                    } else {
+                        const userReturned= data.docId
+                        //console.log('User exists with ID:', userReturned);
+                        userDict[userReturned.id] = { userName: userReturned.userName, userColor: userReturned.userColor };
+                        
+                        //console.log(userDict);
+                        actualizarLeyenda();
+                        idControl=userReturned.id
+                        
+                    }
+                })
+                .catch(error => console.error('Error fetching user:', error));
+            }
         }
         function actualizarLeyenda() {
             // Obtener la referencia al contenedor de la leyenda
