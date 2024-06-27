@@ -73,6 +73,16 @@ class UserRepository {
         throw error;
       }
     }
+    async deleteUser(userId){
+      try {
+        const deleted = await db.doc(userId).delete()
+        
+        return deleted;
+      } catch (error) {
+        console.error('Error deleting users: ', error);
+        throw error;
+      }
+    }
       
       
 };

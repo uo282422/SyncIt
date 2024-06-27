@@ -16,7 +16,7 @@ html(lang="es")
         
         button(type="button", onclick="save()") Guardar
         button(type="button", onclick="load()") Recuperar
-        button(type="button", onclick="loadDates()") RecFechas
+        button(type="button", onclick="removeAllColorSquares()") BorrarColorSquares
         
     span.error#error-texto ERROR! El nombre del usuario solo debe contener letras y números, sin espacios ni otros caracteres.
         
@@ -191,6 +191,7 @@ html(lang="es")
             .catch(error => console.error('Error fetching user:', error));
         }
         function loadDates(){
+            removeAllColorSquares()
             //console.log("Llamada a LoadDates")
             Object.keys(userDict).forEach(function(userId) {
                 var uId = userId
@@ -217,7 +218,7 @@ html(lang="es")
                     //en d.dates esta la lista de dates y en d.color el color del user
                     datesReturned.forEach(d => {
                         d.dates.forEach(day =>{
-                            //console.log(`Fecha ${day} de ${uId}->${d.color}`)
+                            removeColorSquare(day, d.color)
                             addColorSquare(day, d.color)
                         })
                           
@@ -278,49 +279,58 @@ html(lang="es")
             }
         }
         function actualizarLeyenda() {
-            // Obtener la referencia al contenedor de la leyenda
+            
             var legendContainer = document.querySelector('.legend-container');
 
-            // Limpiar la leyenda existente antes de actualizarla
+            
             legendContainer.innerHTML = '';
-            // Crear el elemento de título de leyenda
+            
             var legendTitle = document.createElement('div');
             legendTitle.classList.add('legend-title');
             legendTitle.textContent = 'Leyenda';
             legendContainer.appendChild(legendTitle);
-            // Iterar sobre userDict y crear un LegendItem por cada usuario
+            
             Object.keys(userDict).forEach(function(userId) {
                 var user = userDict[userId];
                 var uName = user.userName;
                 var uColor = user.userColor;
                 var uId = userId;
                 
-                // Crear el elemento de leyenda
+                
                 var newLegendItem = document.createElement('div');
                 newLegendItem.classList.add('legend-item');
 
-                // Crear el elemento de cuadrado de color
+               
                 var colorSquare = document.createElement('span');
                 colorSquare.classList.add('color-square');
                 colorSquare.style.backgroundColor = uColor;
                 colorSquare.setAttribute('data-user', uId); 
 
-                // Agregar el event listener al color square
+                
                 colorSquare.addEventListener('click', function() {
                     var userId = this.getAttribute('data-user');
                     changeUser(userId);
                 });
 
-                // Crear el elemento de texto
+                
                 var legendText = document.createElement('span');
                 legendText.textContent = uName;
 
-                // Añadir el cuadrado de color y el texto al elemento de leyenda
+                var deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-button');
+                deleteButton.innerHTML = '🗑️'; 
+                deleteButton.setAttribute('data-user', uId);
+                deleteButton.addEventListener('click', function() {
+                    var userId = this.getAttribute('data-user');
+                    deleteUser(userId);
+                });
+               
+
                 newLegendItem.appendChild(legendText);
                 newLegendItem.appendChild(colorSquare);
                 newLegendItem.setAttribute('data-user', uName);
-
-                // Agregar el LegendItem al contenedor de la leyenda
+                newLegendItem.appendChild(deleteButton);
+                
                 legendContainer.appendChild(newLegendItem);
             });
 
@@ -328,7 +338,45 @@ html(lang="es")
             document.getElementById('texto').value= ""
             document.getElementById('colorPicker').value="#ffffff"
         }
-
+        function deleteUser(userId) {
+            fetch(`/user/${userId}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                 if (!response.ok) {
+                        throw new Error('Error en la respuesta' + response.statusText);
+                }
+                
+                delete userDict[userId];
+                actualizarLeyenda()
+                loadDates()
+                
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            
+        }
+        function removeColorSquare(day, color) {
+            const dayCell = document.querySelector(`.day-cell[data-day='${day}']`);
+            if (dayCell) {
+                const colorContainer = dayCell.querySelector('.color-container');
+                const colorSquares = colorContainer.querySelectorAll('.color-square');
+                
+                colorSquares.forEach(colorSquare => {
+                    if (colorSquare.style.backgroundColor === color) {
+                        colorContainer.removeChild(colorSquare);
+                    }
+                });
+            }
+        }
+        function removeAllColorSquares() {
+           const colorContainers = document.querySelectorAll('.color-container');
+            colorContainers.forEach(container => {
+            const colorSquares = container.querySelectorAll('.color-square');
+            colorSquares.forEach(square => square.remove());
+        });
+        }
         function changeUser(userId) {
             idControl=userId
 

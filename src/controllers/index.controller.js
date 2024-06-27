@@ -1,6 +1,7 @@
 const controller = {}
 const DateRepository = require('../repositories/dateRepository')
 const UsersRepository = require('../repositories/usersRepository')
+const { body, validationResult } = require('express-validator');
 
 controller.index = async (req,res)=>{
     
@@ -11,19 +12,6 @@ controller.index = async (req,res)=>{
 controller.addDate = async (req,res)=>{
 
     try{
-        
-    //    TODO:: CHECKEAR PORQUE HAN CAMBIADO LOS PARAMETROS DEL BODY
-        //console.log("Post con day: "+req.body.day)
-        //console.log("Post con userId: ", req.body.userId);
-       
-        //console.log(`User: ${req.body.userId}, Day: ${req.body.day}`)
-           
-        
-        //Consultar BD, si existe la date con fecha -> ver su lista de users
-        //Si userNmae no esta en esa lista
-        //  añadir
-        //si no
-        //  no hacer nada
 
          DateRepository.addDate(req.body.day, req.body.userId, req.body.userCol)
         .then(docId => {
@@ -58,18 +46,25 @@ controller.getDatesByUser = async (req,res)=>{
     }
 }
 
-controller.getUser = async (req,res)=>{
+controller.getUser = [
+    body('candName').notEmpty().withMessage('El nombre del candidato es obligatorio.'),
+    body('candColor').notEmpty().withMessage('El color del candidato es obligatorio.'),
 
+    async (req,res)=>{
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
     try{
-        var candName = req.body.candName;
-        var candColor = req.body.candColor;
         
-        //console.log("Serv UserName cand: "+req.body.candName)
-        //console.log("Serv UserColor cand: ", req.body.candColor);
+        var candName = req.body.candName.toLowerCase();
+        var candColor = req.body.candColor;
+
         const docId = await UsersRepository.getUserByNameAndColor(candName, candColor);
 
         if(docId == null){
-            //console.log("NoExiste: "+docId)
+
             const created = await UsersRepository.addUser(candName, candColor);
             return res.status(200).json(created);
         }
@@ -80,6 +75,7 @@ controller.getUser = async (req,res)=>{
         console.log(err)
     }
 }
+];
 controller.getAllUsers = async (req,res)=>{
 
     try{
@@ -99,7 +95,19 @@ controller.getAllUsers = async (req,res)=>{
 }
 
 
-
+controller.deleteUser = async (req,res)=>{
+    const userId = req.params.id;
+    try {
+        const deleteDatesByUser = await DateRepository.deleteDatesByUser(userId);
+        const deletedUser = await UsersRepository.deleteUser(userId); 
+       
+        return res.status(200).json({ message: 'Usuario eliminado correctamente' });
+       
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error del servidor' });
+    }
+}
 module.exports = controller
 
 

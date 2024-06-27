@@ -54,7 +54,28 @@ class DateRepository {
           throw error;
         }
       }
-    
+      async deleteDatesByUser(userId){
+        const querySnapshot = await db
+          .where('user', '==', userId).get();
+          if (querySnapshot.empty) {
+            //console.log(`No se encontraron fechas para el usuario ${userId}`);
+            return null;
+          } 
+          const aux= querySnapshot
+          querySnapshot.forEach(doc => {
+              db.doc(doc.id).delete()
+              
+          });
+
+          return aux
+          
+        
+        } catch (error) {
+          console.error('Error getting dates for user: '+ userId, error);
+          throw error;
+        
+      }
+
       
       
 };
